@@ -2,3 +2,6 @@
 env
 __pycache__
 *.log
+*.db
+*.sqlite3
+*.sql
