@@ -17,7 +17,8 @@ class Database:
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY NOT NULL UNIQUE DEFAULT (lower(hex(randomblob(16)))),
         username TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
+        password TEXT NOT NULL,
+        token INTEGER NOT NULL DEFAULT 0
       )
       ''')
       self.__db.commit()

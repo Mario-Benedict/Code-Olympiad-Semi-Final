@@ -1,1 +1,1 @@
-from .config import DATABASE_FILE
+from .config import *
