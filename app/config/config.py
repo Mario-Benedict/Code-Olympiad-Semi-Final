@@ -1,2 +1,1 @@
-DATABASE_FILE: str = 'inlife.db'
-METADATA_FILE: str = '.inlife'
+GAME_FILE: str = '.inlife_game'

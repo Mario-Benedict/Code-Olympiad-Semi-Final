@@ -25,6 +25,9 @@ class Database:
     except sqlite3.Error as e:
       logger.error(e)
       sys.exit(0)
+    except sqlite3.OperationalError as e:
+      logger.error(e)
+      sys.exit(0)
 
   def fetch_one(self, query) -> Any:
     result = self.__cur.execute(query)

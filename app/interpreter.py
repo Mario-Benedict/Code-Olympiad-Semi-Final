@@ -62,20 +62,21 @@ class InLifeInterpreter:
         continue
 
   def start(self) -> None:
-    self.session = self.get_session()
-    self.print_banner()
+    while True:
+      self.session = self.get_session()
+      self.print_banner()
 
-    choices = {
-      'Minigame': lambda: game_controller(),
-      'Option 2': lambda: print('Option 2'),
-      'Shop': lambda: shop_controller(),
-      'Logout': lambda: self.logout(),
-      'Exit': lambda: sys.exit(1)
-    }
+      choices = {
+        'Minigame': lambda: game_controller(self.__db, self.session),
+        'Option 2': lambda: print('Option 2'),
+        'Shop': lambda: shop_controller(),
+        'Logout': lambda: self.logout(),
+        'Exit': lambda: sys.exit(1)
+      }
 
-    option = enquiries.choose("Choose one of this option", choices)
+      option = enquiries.choose("Choose one of this option", choices)
 
-    choices[option]()
+      choices[option]()
 
   def get_session(self) -> Union[List[str], None]:
     if not os.path.isfile(get_file_dir(METADATA_FILE)):
@@ -127,7 +128,6 @@ class InLifeInterpreter:
           self.__db.query(f'INSERT INTO users (username, password) VALUES ("{username}", "{hashed_password}")')
           color_print('Registration successful', LIGHT_CYAN)
           break
-
 
   def logout(self) -> None:
     remove_file_home_dir(METADATA_FILE)
