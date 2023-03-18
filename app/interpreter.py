@@ -5,6 +5,7 @@ import bcrypt
 from app.config import DATABASE_FILE, METADATA_FILE
 from app.utils.logging import logger
 from app.constant.color import LIGHT_RED, END, LIGHT_YELLOW, WHITE, LIGHT_GREEN, BOLD, LIGHT_CYAN
+from app.constant.core import BANNER_TEXT
 from app.database import Database
 from maskpass import askpass
 from app.utils.helper import get_file_dir, remove_file_home_dir, file_checker, clear, color_print
@@ -12,6 +13,7 @@ from datetime import datetime, timedelta
 from typing import List, Union
 import enquiries
 from app.controllers import game_controller, shop_controller
+from app.types import Session
 
 class InLifeInterpreter:
   def __init__(self) -> None:
@@ -22,13 +24,7 @@ class InLifeInterpreter:
     self.start() if self.session is not None else self.authentication()
 
   def print_banner(self) -> None:
-    banner = f'''    {LIGHT_RED}____            __   _    ____
-   /  _/  ____     / /  (_)  / __/  ___
-   / /   / __ \   / /  / /  / /_   / _ \\
- _/ /   / / / /  / /  / /  / __/  /  __/
-/___/  /_/ /_/  /_/  /_/  /_/     \___/{END}
-    '''
-
+    banner = BANNER_TEXT
     banner += f'''
 {LIGHT_YELLOW}[*] Created By    : {WHITE}Mario Benedict
  {LIGHT_YELLOW}|---> Github     : {WHITE}https://github.com/Mario-Benedict
@@ -69,7 +65,7 @@ class InLifeInterpreter:
       choices = {
         'Minigame': lambda: game_controller(self.__db, self.session),
         'Option 2': lambda: print('Option 2'),
-        'Shop': lambda: shop_controller(),
+        'Shop': lambda: shop_controller(self.__db, self.session),
         'Logout': lambda: self.logout(),
         'Exit': lambda: sys.exit(1)
       }
@@ -131,5 +127,5 @@ class InLifeInterpreter:
 
   def logout(self) -> None:
     remove_file_home_dir(METADATA_FILE)
-
     print(f'{LIGHT_CYAN}Good bye! {END}')
+    sys.exit(1)

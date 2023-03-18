@@ -1,3 +1,3 @@
-from .general import ListOfDict
+from .general import ListOfDict, Session
 
 del general

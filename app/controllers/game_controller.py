@@ -2,6 +2,7 @@ import enquiries
 from app.utils.helper import clear, color_print, get_file_dir
 from app.constant.core import TRASH_CATEGORIES
 from app.database import Database
+from app.types import Session
 from app.config import GAME_FILE
 from app.constant.color import LIGHT_YELLOW, BOLD, END, LIGHT_CYAN
 import time
@@ -37,7 +38,7 @@ def check_user_played_today() -> bool:
 def generate_token_value(score: int) -> int:
   return int((score / total_questions) * random.randint(1, 100))
 
-def game_controller(db: Database, session: List[Union[str, int]]) -> None:
+def game_controller(db: Database, session: Session) -> None:
   clear()
 
   if check_user_played_today():

@@ -1,5 +1,6 @@
-from typing import List, Union
+from typing import List, Union, Dict
 from app.types import ListOfDict
+from app.constant.color import LIGHT_RED, END
 
 LOG_FILE: str = 'inlife.log'
 LOG_MAX_BYTES: int = 1024 * 1024 * 10
@@ -67,3 +68,19 @@ TRASH_CATEGORIES: ListOfDict[Union[str, List[str]]] = [
     ]
   },
 ]
+
+SHOP_LIST: Dict[str, int] = {
+  'Inlife Shopping Bag (1000 tokens)': 1000,
+  'Inlife Reusable Water Bottle (3000 tokens)': 3000,
+  'Inlife Reusable Straw (500 tokens)': 500,
+  'Inlife Reusable Coffee Cup (2000 tokens)': 2000,
+  'Inlife T-Shirt (5000 tokens)': 5000,
+  'Inlife Lunch Box (10000 tokens)': 10000,
+}
+
+BANNER_TEXT: str = f'''    {LIGHT_RED}____            __   _    ____
+   /  _/  ____     / /  (_)  / __/  ___
+   / /   / __ \   / /  / /  / /_   / _ \\
+ _/ /   / / / /  / /  / /  / __/  /  __/
+/___/  /_/ /_/  /_/  /_/  /_/     \___/{END}
+    '''
