@@ -7,13 +7,13 @@ from app.utils.logging import logger
 from app.constant.color import LIGHT_RED, END, LIGHT_YELLOW, WHITE, LIGHT_GREEN, BOLD, LIGHT_CYAN
 from app.constant.core import BANNER_TEXT
 from app.database import Database
+from app.utils.formatting import printf, format_str
 from maskpass import askpass
-from app.utils.helper import get_file_dir, remove_file_home_dir, file_checker, clear, color_print
+from app.utils.helper import get_file_dir, remove_file_home_dir, file_checker, clear
 from datetime import datetime, timedelta
 from typing import List, Union
 import enquiries
 from app.controllers import game_controller, shop_controller
-from app.types import Session
 
 class InLifeInterpreter:
   def __init__(self) -> None:
@@ -25,25 +25,29 @@ class InLifeInterpreter:
 
   def print_banner(self) -> None:
     banner = BANNER_TEXT
-    banner += f'''
-{LIGHT_YELLOW}[*] Created By    : {WHITE}Mario Benedict
- {LIGHT_YELLOW}|---> Github     : {WHITE}https://github.com/Mario-Benedict
-{LIGHT_YELLOW}[*] Version       : {WHITE}1.0.0
-    '''
 
-    banner += f'''
-{LIGHT_CYAN}Welcome back, {self.session[1].upper()}!{END}
-'''
+    banner += '\n\n'
+
+    banner += format_str('[*] Created By    : ', LIGHT_YELLOW)
+    banner += format_str('Mario Benedict\n', WHITE)
+
+    banner += format_str(' |---> GitHub ', LIGHT_YELLOW)
+    banner += format_str('https://github.com/Mario-Benedict\n', WHITE)
+
+    banner += format_str('[*] Version       : ', LIGHT_YELLOW)
+    banner += format_str('1.0.0\n', WHITE)
+
+    banner += '\n'
+
+    banner += format_str(f'Welcome back, {self.session[1].upper()}!', LIGHT_CYAN)
 
     print(banner)
 
   def authentication(self) -> None:
     while True:
-      print(f'''{BOLD}You are not authenticated. Please login to continue or register if you don\'t have an account.{END}
-  {LIGHT_GREEN}[1] {END}Login
-  {LIGHT_GREEN}[2] {END}Register
-      '''
-      )
+      printf('You are not authenticated. Please login to continue or register if you don\'t have an account.', BOLD)
+      print(format_str('  [1]', LIGHT_GREEN), 'Login', sep=' ')
+      print(format_str('  [2]', LIGHT_GREEN), 'Register', sep=' ')
 
       choice = input('Choice: ')
 
@@ -54,7 +58,7 @@ class InLifeInterpreter:
         self.register()
         break
       else:
-        color_print('Invalid choice.', LIGHT_YELLOW)
+        printf('Invalid choice.', LIGHT_YELLOW)
         continue
 
   def start(self) -> None:
@@ -84,14 +88,14 @@ class InLifeInterpreter:
 
   def login(self) -> None:
     while True:
-      color_print('Login to your account', BOLD)
+      printf('Login to your account', BOLD)
       username = input('Username: ')
       password = askpass('Password: ')
 
       user = self.__db.fetch_one(f'SELECT * FROM users WHERE username = "{username}"')
 
       if user is None:
-        color_print('Invalid username or password', LIGHT_YELLOW)
+        printf('Invalid username or password', LIGHT_YELLOW)
         continue
 
       if bcrypt.checkpw(password.encode('utf-8'), user[2].encode('utf-8')):
@@ -100,32 +104,32 @@ class InLifeInterpreter:
             f.write(f'{str(user[0])}, {str(user[1])}, {expiration_date.strftime("%Y-%m-%d %H:%M:%S")}')
 
         clear()
-        color_print('Login successful', LIGHT_CYAN)
+        printf('Login successful', LIGHT_CYAN)
         break
 
-      color_print('Invalid username or password', LIGHT_YELLOW)
+      printf('Invalid username or password', LIGHT_YELLOW)
       continue
 
     self.start()
 
   def register(self) -> None:
     while True:
-      color_print('Register your account', BOLD)
+      printf('Register your account', BOLD)
       username = input('Username: ')
       password = askpass('Password: ')
       confirm_password = askpass('Confirm Password: ')
 
       if password != confirm_password:
-          color_print('Password doesn\'t match', LIGHT_YELLOW)
+          printf('Password doesn\'t match', LIGHT_YELLOW)
       elif self.__db.fetch_one(f'SELECT id FROM users WHERE username = "{username}"') is not None:
-          color_print('Username already taken', LIGHT_YELLOW)
+          printf('Username already taken', LIGHT_YELLOW)
       else:
           hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
           self.__db.query(f'INSERT INTO users (username, password) VALUES ("{username}", "{hashed_password}")')
-          color_print('Registration successful', LIGHT_CYAN)
+          printf('Registration successful', LIGHT_CYAN)
           break
 
   def logout(self) -> None:
     remove_file_home_dir(METADATA_FILE)
-    print(f'{LIGHT_CYAN}Good bye! {END}')
+    printf('Good bye!', LIGHT_CYAN)
     sys.exit(1)

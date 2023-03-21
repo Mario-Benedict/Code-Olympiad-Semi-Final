@@ -28,7 +28,3 @@ def generate_input_text(text: str) -> str:
 
 def clear() -> None:
   os.system('clear') if os.name == 'posix' else os.system('cls')
-
-def color_print(text: str, color: str, end: str = '\n') -> None:
-  print(f'{color}{text}{END}', end=end)
-

@@ -1,5 +1,6 @@
 import enquiries
-from app.utils.helper import clear, color_print, get_file_dir
+from app.utils.helper import clear, get_file_dir
+from app.utils.formatting import printf
 from app.constant.core import TRASH_CATEGORIES
 from app.database import Database
 from app.types import Session
@@ -42,14 +43,14 @@ def game_controller(db: Database, session: Session) -> None:
   clear()
 
   if check_user_played_today():
-    color_print('You have already played today. Please come back tomorrow.', LIGHT_YELLOW)
+    printf('You have already played today. Please come back tomorrow.', LIGHT_YELLOW)
     return
 
   questions: List[Dict[str, str]] = generate_questions()
 
   score: int = 0
   for number, question in enumerate(questions, start=1):
-    color_print(f'Question {number} of {len(questions)}', LIGHT_YELLOW)
+    printf(f'Question {number} of {len(questions)}', LIGHT_YELLOW)
     question_text = f'What is the correct category for {BOLD}{question["name"]}{END}?'
 
     user_answer = enquiries.choose(question_text, answer_options)
@@ -69,5 +70,5 @@ def game_controller(db: Database, session: Session) -> None:
 
   db.query(f'UPDATE users SET token = token + {tokens} WHERE id = "{session[0]}"')
 
-  color_print(f'Your score is {score} out of {total_questions}', LIGHT_CYAN)
-  color_print(f'You have earned {tokens} {"tokens" if tokens > 1 else "token"}', LIGHT_CYAN)
+  printf(f'Your score is {score} out of {total_questions}', LIGHT_CYAN)
+  printf(f'You have earned {tokens} {"tokens" if tokens > 1 else "token"}', LIGHT_CYAN)
