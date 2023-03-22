@@ -74,7 +74,7 @@ class InLifeInterpreter:
         'Exit': lambda: sys.exit(1)
       }
 
-      option = enquiries.choose("Choose one of this option", choices)
+      option = enquiries.choose('Choose one of this option', choices)
       choices[option]()
 
   def __start_minigame(self) -> None:

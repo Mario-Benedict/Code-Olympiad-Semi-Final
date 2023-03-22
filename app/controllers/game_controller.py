@@ -53,122 +53,122 @@ class GameController(BaseController):
 _QUESTIONS: List[Question] = [
   {
     'category': TrashCategory.Household,
-    'question': "Newspapers"
+    'question': 'Newspapers'
   },
   {
     'category': TrashCategory.Household,
-    'question': "Cardboards"
+    'question': 'Cardboards'
   },
   {
     'category': TrashCategory.Household,
-    'question': "Plastic Bags"
+    'question': 'Plastic Bags'
   },
   {
     'category': TrashCategory.Household,
-    'question': "Glass Bottles"
+    'question': 'Glass Bottles'
   },
   {
     'category': TrashCategory.Household,
-    'question': "Metal Cans"
+    'question': 'Metal Cans'
   },
   {
     'category': TrashCategory.Hazardous,
-    'question': "Batteries"
+    'question': 'Batteries'
   },
   {
     'category': TrashCategory.Hazardous,
-    'question': "Light Bulbs"
+    'question': 'Light Bulbs'
   },
   {
     'category': TrashCategory.Hazardous,
-    'question': "Fluorescent Tubes"
+    'question': 'Fluorescent Tubes'
   },
   {
     'category': TrashCategory.Hazardous,
-    'question': "Paint"
+    'question': 'Paint'
   },
   {
     'category': TrashCategory.Hazardous,
-    'question': "Oil"
+    'question': 'Oil'
   },
   {
     'category': TrashCategory.Medical,
-    'question': "Bandages"
+    'question': 'Bandages'
   },
   {
     'category': TrashCategory.Medical,
-    'question': "Syringes"
+    'question': 'Syringes'
   },
   {
     'category': TrashCategory.Medical,
-    'question': "Gloves"
+    'question': 'Gloves'
   },
   {
     'category': TrashCategory.Medical,
-    'question': "Pills"
+    'question': 'Pills'
   },
   {
     'category': TrashCategory.Medical,
-    'question': "Needles"
+    'question': 'Needles'
   },
   {
     'category': TrashCategory.Electrical,
-    'question': "Old Computers"
+    'question': 'Old Computers'
   },
   {
     'category': TrashCategory.Electrical,
-    'question': "Old Laptops"
+    'question': 'Old Laptops'
   },
   {
     'category': TrashCategory.Electrical,
-    'question': "Old Mobile Phones"
+    'question': 'Old Mobile Phones'
   },
   {
     'category': TrashCategory.Electrical,
-    'question': "Old Printers"
+    'question': 'Old Printers'
   },
   {
     'category': TrashCategory.Electrical,
-    'question': "Old Printers"
+    'question': 'Old Printers'
   },
   {
     'category': TrashCategory.Construction,
-    'question': "Bricks"
+    'question': 'Bricks'
   },
   {
     'category': TrashCategory.Construction,
-    'question': "Gypsum"
+    'question': 'Gypsum'
   },
   {
     'category': TrashCategory.Construction,
-    'question': "Sawdust"
+    'question': 'Sawdust'
   },
   {
     'category': TrashCategory.Construction,
-    'question': "Steel"
+    'question': 'Steel'
   },
   {
     'category': TrashCategory.Construction,
-    'question': "Broken Windows"
+    'question': 'Broken Windows'
   },
   {
     'category': TrashCategory.Organic,
-    'question': "Fruits"
+    'question': 'Fruits'
   },
   {
     'category': TrashCategory.Organic,
-    'question': "Vegetables"
+    'question': 'Vegetables'
   },
   {
     'category': TrashCategory.Organic,
-    'question': "Leaves"
+    'question': 'Leaves'
   },
   {
     'category': TrashCategory.Organic,
-    'question': "Grass"
+    'question': 'Grass'
   },
   {
     'category': TrashCategory.Organic,
-    'question': "Flowers"
+    'question': 'Flowers'
   },
 ]
