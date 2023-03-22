@@ -7,7 +7,7 @@ from typing import Any, Union
 class Database:
   def __init__(self) -> None:
     try:
-      self.__db = sqlite3.connect(DATABASE_FILE)
+      self.__db = sqlite3.connect(DATABASE_FILE, detect_types=sqlite3.PARSE_COLNAMES | sqlite3.PARSE_DECLTYPES)
 
       def row_dict_factory(cursor: sqlite3.Cursor, row: list) -> dict:
         d = {}
@@ -43,7 +43,8 @@ class Database:
         id TEXT PRIMARY KEY NOT NULL UNIQUE DEFAULT (lower(hex(randomblob(16)))),
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        token INTEGER NOT NULL DEFAULT 0
+        token INTEGER NOT NULL DEFAULT 0,
+        last_played TIMESTAMP NULL
       )
     '''
 

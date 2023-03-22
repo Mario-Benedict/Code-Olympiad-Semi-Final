@@ -14,7 +14,7 @@ class GameView:
   def start(self, uid: str) -> None:
     clear()
 
-    if self.__controller.has_user_played_today():
+    if self.__controller.has_user_played_today(uid):
       printf('You have already played today. Please come back tomorrow.', LIGHT_YELLOW)
       return
 

@@ -2,8 +2,6 @@ from dataclasses import dataclass
 from enum import Enum
 from app.constant.database import USERS_TABLE
 from app.controllers.base_controller import BaseController
-from app.utils.helper import get_file_dir
-from app.constant.file import GAME_FILE
 from typing import List
 import random
 from datetime import datetime, timedelta
@@ -22,6 +20,7 @@ class Question:
   category: TrashCategory
 
 _TOTAL_QUESTIONS = 5
+_COOLDOWN_HOURS = 24
 
 class GameController(BaseController):
   def get_questions(self) -> List[Question]:
@@ -30,27 +29,20 @@ class GameController(BaseController):
   def get_options(self) -> List[TrashCategory]:
     return [category.value for category in TrashCategory]
 
-  def has_user_played_today(self) -> bool:
-    try:
-      with open(get_file_dir(GAME_FILE), 'r') as f:
-        data = f.read().strip()
-        if data != '':
-          last_played = datetime.strptime(data.strip(), '%Y-%m-%d %H:%M:%S')
-          if last_played > datetime.now():
-            return True
+  def has_user_played_today(self, uid: str) -> bool:
+    sql = f'SELECT last_played FROM {USERS_TABLE} WHERE id = ?'
+    last_played = self._db.fetch_one(sql, uid)['last_played']
 
-        return False
-    except FileNotFoundError:
-        return False
+    if last_played is None:
+      return False
+
+    time_allowed_to_play = last_played + timedelta(hours=_COOLDOWN_HOURS)
+    return time_allowed_to_play > datetime.now()
 
   def finish_session(self, uid: str, score: int) -> int:
-    with open(get_file_dir(GAME_FILE), 'w+') as f:
-      time_to_play = datetime.now() + timedelta(days=1)
-      f.write(f'{time_to_play.strftime("%Y-%m-%d %H:%M:%S")}')
-
     reward = self.__get_reward(score)
 
-    sql = f'UPDATE {USERS_TABLE} SET token = token + ? WHERE id = ?'
+    sql = f'UPDATE {USERS_TABLE} SET token = token + ?, last_played = CURRENT_TIMESTAMP WHERE id = ?'
     self._db.query(sql, self.__get_reward(score), uid)
 
     return reward
