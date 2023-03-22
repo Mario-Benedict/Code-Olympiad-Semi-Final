@@ -1,73 +1,174 @@
-import enquiries
-from app.utils.helper import clear, color_print, get_file_dir
-from app.constant.core import TRASH_CATEGORIES
-from app.database import Database
-from app.types import Session
-from app.config import GAME_FILE
-from app.constant.color import LIGHT_YELLOW, BOLD, END, LIGHT_CYAN
-import time
-from typing import List, Dict, Union
+from dataclasses import dataclass
+from enum import Enum
+from app.constant.database import USERS_TABLE
+from app.controllers.base_controller import BaseController
+from typing import List
 import random
 from datetime import datetime, timedelta
 
-answer_options = [answer['name'] for answer in TRASH_CATEGORIES]
+class TrashCategory(Enum):
+  Household = 'Household'
+  Hazardous = 'Hazardous'
+  Medical = 'Medical'
+  Electrical = 'Electrical'
+  Construction = 'Construction'
+  Organic = 'Organic'
 
-total_questions = 5
+@dataclass
+class Question:
+  question: str
+  category: TrashCategory
 
-def generate_questions() -> List[Dict[str, str]]:
-  items =  [{ 'name': item, 'answer': category['name']} for category in TRASH_CATEGORIES for item in category['items']]
+_TOTAL_QUESTIONS = 5
+_COOLDOWN_HOURS = 24
 
-  for _ in range(total_questions):
-    random.shuffle(items)
+class GameController(BaseController):
+  def get_questions(self) -> List[Question]:
+    return random.sample(_QUESTIONS, _TOTAL_QUESTIONS)
 
-  return random.sample(items, total_questions)
+  def get_options(self) -> List[TrashCategory]:
+    return [category.value for category in TrashCategory]
 
-def check_user_played_today() -> bool:
-  try:
-    with open(get_file_dir(GAME_FILE), 'r') as f:
-      data = f.read()
-      if data != '':
-        last_played = datetime.strptime(data.strip(), '%Y-%m-%d %H:%M:%S')
-        if last_played > datetime.now():
-          return True
+  def has_user_played_today(self, uid: str) -> bool:
+    sql = f'SELECT last_played FROM {USERS_TABLE} WHERE id = ?'
+    last_played = self._db.fetch_one(sql, uid)['last_played']
 
+    if last_played is None:
       return False
-  except FileNotFoundError:
-    return False
 
-def generate_token_value(score: int) -> int:
-  return int((score / total_questions) * random.randint(1, 100))
+    time_allowed_to_play = last_played + timedelta(hours=_COOLDOWN_HOURS)
+    return time_allowed_to_play > datetime.now()
 
-def game_controller(db: Database, session: Session) -> None:
-  clear()
+  def finish_session(self, uid: str, score: int) -> int:
+    reward = self.__get_reward(score)
 
-  if check_user_played_today():
-    color_print('You have already played today. Please come back tomorrow.', LIGHT_YELLOW)
-    return
+    sql = f'UPDATE {USERS_TABLE} SET token = token + ?, last_played = CURRENT_TIMESTAMP WHERE id = ?'
+    self._db.query(sql, self.__get_reward(score), uid)
 
-  questions: List[Dict[str, str]] = generate_questions()
+    return reward
 
-  score: int = 0
-  for number, question in enumerate(questions, start=1):
-    color_print(f'Question {number} of {len(questions)}', LIGHT_YELLOW)
-    question_text = f'What is the correct category for {BOLD}{question["name"]}{END}?'
+  def __get_reward(self, score: int) -> int:
+    return int((score / _TOTAL_QUESTIONS) * random.randint(1, 100))
 
-    user_answer = enquiries.choose(question_text, answer_options)
-
-    if user_answer == question['answer']:
-      score += 1
-
-    time.sleep(1)
-
-    clear()
-
-  with open(get_file_dir(GAME_FILE), 'w+') as f:
-    time_to_play = datetime.now() + timedelta(days=1)
-    f.write(f'{time_to_play.strftime("%Y-%m-%d %H:%M:%S")}')
-
-  tokens = generate_token_value(score)
-
-  db.query(f'UPDATE users SET token = token + {tokens} WHERE id = "{session[0]}"')
-
-  color_print(f'Your score is {score} out of {total_questions}', LIGHT_CYAN)
-  color_print(f'You have earned {tokens} {"tokens" if tokens > 1 else "token"}', LIGHT_CYAN)
+_QUESTIONS: List[Question] = [
+  {
+    'category': TrashCategory.Household,
+    'question': 'Newspapers'
+  },
+  {
+    'category': TrashCategory.Household,
+    'question': 'Cardboards'
+  },
+  {
+    'category': TrashCategory.Household,
+    'question': 'Plastic Bags'
+  },
+  {
+    'category': TrashCategory.Household,
+    'question': 'Glass Bottles'
+  },
+  {
+    'category': TrashCategory.Household,
+    'question': 'Metal Cans'
+  },
+  {
+    'category': TrashCategory.Hazardous,
+    'question': 'Batteries'
+  },
+  {
+    'category': TrashCategory.Hazardous,
+    'question': 'Light Bulbs'
+  },
+  {
+    'category': TrashCategory.Hazardous,
+    'question': 'Fluorescent Tubes'
+  },
+  {
+    'category': TrashCategory.Hazardous,
+    'question': 'Paint'
+  },
+  {
+    'category': TrashCategory.Hazardous,
+    'question': 'Oil'
+  },
+  {
+    'category': TrashCategory.Medical,
+    'question': 'Bandages'
+  },
+  {
+    'category': TrashCategory.Medical,
+    'question': 'Syringes'
+  },
+  {
+    'category': TrashCategory.Medical,
+    'question': 'Gloves'
+  },
+  {
+    'category': TrashCategory.Medical,
+    'question': 'Pills'
+  },
+  {
+    'category': TrashCategory.Medical,
+    'question': 'Needles'
+  },
+  {
+    'category': TrashCategory.Electrical,
+    'question': 'Old Computers'
+  },
+  {
+    'category': TrashCategory.Electrical,
+    'question': 'Old Laptops'
+  },
+  {
+    'category': TrashCategory.Electrical,
+    'question': 'Old Mobile Phones'
+  },
+  {
+    'category': TrashCategory.Electrical,
+    'question': 'Old Printers'
+  },
+  {
+    'category': TrashCategory.Electrical,
+    'question': 'Old Printers'
+  },
+  {
+    'category': TrashCategory.Construction,
+    'question': 'Bricks'
+  },
+  {
+    'category': TrashCategory.Construction,
+    'question': 'Gypsum'
+  },
+  {
+    'category': TrashCategory.Construction,
+    'question': 'Sawdust'
+  },
+  {
+    'category': TrashCategory.Construction,
+    'question': 'Steel'
+  },
+  {
+    'category': TrashCategory.Construction,
+    'question': 'Broken Windows'
+  },
+  {
+    'category': TrashCategory.Organic,
+    'question': 'Fruits'
+  },
+  {
+    'category': TrashCategory.Organic,
+    'question': 'Vegetables'
+  },
+  {
+    'category': TrashCategory.Organic,
+    'question': 'Leaves'
+  },
+  {
+    'category': TrashCategory.Organic,
+    'question': 'Grass'
+  },
+  {
+    'category': TrashCategory.Organic,
+    'question': 'Flowers'
+  },
+]

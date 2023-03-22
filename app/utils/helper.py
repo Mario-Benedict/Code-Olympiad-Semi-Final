@@ -3,7 +3,7 @@ from app.constant.color import UNDERLINE, END
 from typing import Union
 
 def get_home_dir() -> str:
-    return os.getenv('HOME') if os.name == 'posix' else os.getenv('USERPROFILE')
+  return os.getenv('HOME') if os.name == 'posix' else os.getenv('USERPROFILE')
 
 def get_file_dir(file_name: str) -> str:
   home_dir = get_home_dir()
@@ -23,12 +23,5 @@ def file_checker(file_dir, action = None) -> Union[bool, None]:
 
   return file_exists
 
-def generate_input_text(text: str) -> str:
-  return f'{UNDERLINE}{text}{END}'
-
 def clear() -> None:
   os.system('clear') if os.name == 'posix' else os.system('cls')
-
-def color_print(text: str, color: str, end: str = '\n') -> None:
-  print(f'{color}{text}{END}', end=end)
-

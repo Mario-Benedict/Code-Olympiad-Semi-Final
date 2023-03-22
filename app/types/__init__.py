@@ -1,3 +1,3 @@
-from .general import ListOfDict, Session
+from .session import Session
 
-del general
+del session

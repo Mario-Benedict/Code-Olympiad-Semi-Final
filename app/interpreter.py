@@ -1,131 +1,93 @@
-import os
 import sys
-import sqlite3
-import bcrypt
-from app.config import DATABASE_FILE, METADATA_FILE
-from app.utils.logging import logger
-from app.constant.color import LIGHT_RED, END, LIGHT_YELLOW, WHITE, LIGHT_GREEN, BOLD, LIGHT_CYAN
+from app.constant.file import DATABASE_FILE, METADATA_FILE
+from app.constant.color import LIGHT_YELLOW, WHITE, LIGHT_CYAN
 from app.constant.core import BANNER_TEXT
 from app.database import Database
-from maskpass import askpass
-from app.utils.helper import get_file_dir, remove_file_home_dir, file_checker, clear, color_print
-from datetime import datetime, timedelta
-from typing import List, Union
+from app.utils.formatting import printf, format_str
+from app.utils.logging import logger
+from app.utils.helper import remove_file_home_dir, file_checker, clear
 import enquiries
-from app.controllers import game_controller, shop_controller
-from app.types import Session
+from app.controllers import GameController, AuthController, ShopController
+from app.views.auth_view import AuthView
+from app.views.game_view import GameView
+from app.views.shop_view import ShopView
 
 class InLifeInterpreter:
   def __init__(self) -> None:
-    clear()
     file_checker(DATABASE_FILE, lambda: remove_file_home_dir(METADATA_FILE))
+
     self.__db = Database()
-    self.session = self.get_session()
-    self.start() if self.session is not None else self.authentication()
 
-  def print_banner(self) -> None:
+    self.__auth_controller = AuthController(self.__db)
+    self.__game_controller = GameController(self.__db)
+    self.__shop_controller = ShopController(self.__db)
+
+  def start(self) -> None:
+    try:
+      while True:
+        clear()
+
+        self.session = self.__auth_controller.get_session()
+        self.__start_app() if self.session is not None else self.__start_auth()
+    except (KeyboardInterrupt, SystemExit):
+      logger.info('Exiting application...')
+      printf('\nExiting application...', LIGHT_CYAN)
+
+      self.__dispose()
+      sys.exit(0)
+
+  def __print_banner(self) -> None:
     banner = BANNER_TEXT
-    banner += f'''
-{LIGHT_YELLOW}[*] Created By    : {WHITE}Mario Benedict
- {LIGHT_YELLOW}|---> Github     : {WHITE}https://github.com/Mario-Benedict
-{LIGHT_YELLOW}[*] Version       : {WHITE}1.0.0
-    '''
+    username = self.session.username.upper()
 
-    banner += f'''
-{LIGHT_CYAN}Welcome back, {self.session[1].upper()}!{END}
-'''
+    banner += '\n\n'
+
+    banner += format_str('[*] Created By    : ', LIGHT_YELLOW)
+    banner += format_str('Mario Benedict\n', WHITE)
+
+    banner += format_str(' |---> GitHub ', LIGHT_YELLOW)
+    banner += format_str('https://github.com/Mario-Benedict\n', WHITE)
+
+    banner += format_str('[*] Version       : ', LIGHT_YELLOW)
+    banner += format_str('1.0.0\n', WHITE)
+
+    banner += '\n'
+
+    banner += format_str(f'Welcome back, {username}!', LIGHT_CYAN)
 
     print(banner)
 
-  def authentication(self) -> None:
+  def __start_auth(self) -> None:
+    view = AuthView(self.__auth_controller)
+    view.start()
+
+    self.session = self.__auth_controller.get_session()
+
+  def __start_app(self) -> None:
     while True:
-      print(f'''{BOLD}You are not authenticated. Please login to continue or register if you don\'t have an account.{END}
-  {LIGHT_GREEN}[1] {END}Login
-  {LIGHT_GREEN}[2] {END}Register
-      '''
-      )
-
-      choice = input('Choice: ')
-
-      if choice == '1':
-        self.login()
-        break
-      elif choice == '2':
-        self.register()
-        break
-      else:
-        color_print('Invalid choice.', LIGHT_YELLOW)
-        continue
-
-  def start(self) -> None:
-    while True:
-      self.session = self.get_session()
-      self.print_banner()
+      self.__print_banner()
 
       choices = {
-        'Minigame': lambda: game_controller(self.__db, self.session),
-        'Option 2': lambda: print('Option 2'),
-        'Shop': lambda: shop_controller(self.__db, self.session),
-        'Logout': lambda: self.logout(),
+        'Minigame': self.__start_minigame,
+        'Shop': self.__start_shop,
+        'Logout': self.__logout,
         'Exit': lambda: sys.exit(1)
       }
 
-      option = enquiries.choose("Choose one of this option", choices)
-
+      option = enquiries.choose('Choose one of this option', choices)
       choices[option]()
 
-  def get_session(self) -> Union[List[str], None]:
-    if not os.path.isfile(get_file_dir(METADATA_FILE)):
-      return None
+  def __start_minigame(self) -> None:
+    view = GameView(self.__game_controller)
+    view.start(self.session.uid)
 
-    with open(get_file_dir(METADATA_FILE), 'r') as f:
-      session = f.read().split(', ')
-      return session
+  def __start_shop(self) -> None:
+    view = ShopView(self.__shop_controller)
+    view.start(self.session.uid)
 
-  def login(self) -> None:
-    while True:
-      color_print('Login to your account', BOLD)
-      username = input('Username: ')
-      password = askpass('Password: ')
+  def __logout(self) -> None:
+    printf('Good bye!', LIGHT_CYAN)
+    self.__auth_controller.logout()
 
-      user = self.__db.fetch_one(f'SELECT * FROM users WHERE username = "{username}"')
-
-      if user is None:
-        color_print('Invalid username or password', LIGHT_YELLOW)
-        continue
-
-      if bcrypt.checkpw(password.encode('utf-8'), user[2].encode('utf-8')):
-        with open(get_file_dir(METADATA_FILE), 'w') as f:
-            expiration_date = datetime.now() + timedelta(days=30)
-            f.write(f'{str(user[0])}, {str(user[1])}, {expiration_date.strftime("%Y-%m-%d %H:%M:%S")}')
-
-        clear()
-        color_print('Login successful', LIGHT_CYAN)
-        break
-
-      color_print('Invalid username or password', LIGHT_YELLOW)
-      continue
-
-    self.start()
-
-  def register(self) -> None:
-    while True:
-      color_print('Register your account', BOLD)
-      username = input('Username: ')
-      password = askpass('Password: ')
-      confirm_password = askpass('Confirm Password: ')
-
-      if password != confirm_password:
-          color_print('Password doesn\'t match', LIGHT_YELLOW)
-      elif self.__db.fetch_one(f'SELECT id FROM users WHERE username = "{username}"') is not None:
-          color_print('Username already taken', LIGHT_YELLOW)
-      else:
-          hashed_password = bcrypt.hashpw(password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
-          self.__db.query(f'INSERT INTO users (username, password) VALUES ("{username}", "{hashed_password}")')
-          color_print('Registration successful', LIGHT_CYAN)
-          break
-
-  def logout(self) -> None:
-    remove_file_home_dir(METADATA_FILE)
-    print(f'{LIGHT_CYAN}Good bye! {END}')
-    sys.exit(1)
+  def __dispose(self) -> None:
+    self.__db.close()

@@ -1,39 +1,51 @@
 import sqlite3
 import sys
-from app.config import DATABASE_FILE
+from app.constant.file import DATABASE_FILE
 from app.utils.logging import logger
-from typing import Any
+from typing import Any, Union
 
 class Database:
   def __init__(self) -> None:
-    self.__db = None
-    self.__cur = None
-
     try:
-      self.__db = sqlite3.connect(DATABASE_FILE)
-      self.__cur = self.__db.cursor()
+      self.__db = sqlite3.connect(DATABASE_FILE, detect_types=sqlite3.PARSE_COLNAMES | sqlite3.PARSE_DECLTYPES)
 
-      self.__cur.execute('''
+      def row_dict_factory(cursor: sqlite3.Cursor, row: list) -> dict:
+        d = {}
+        for idx, col in enumerate(cursor.description):
+            d[col[0]] = row[idx]
+        return d
+
+      self.__db.row_factory = row_dict_factory
+      self.__setup_tables()
+
+    except sqlite3.Error as e:
+      logger.error(e)
+      sys.exit(0)
+
+  def close(self) -> None:
+    self.__db.close()
+
+  def fetch_one(self, query: str, *params: Union[Any, None]) -> Any:
+    result = self.__db.execute(query, params)
+    return result.fetchone()
+
+  def fetch_all(self, query: str, *params: Union[Any, None]) -> list:
+    result = self.__db.execute(query, params)
+    return result.fetchall()
+
+  def query(self, query: str, *params: Union[Any, None]) -> None:
+    self.__db.execute(query, params)
+    self.__db.commit()
+
+  def __setup_tables(self) -> None:
+    sql = '''
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY NOT NULL UNIQUE DEFAULT (lower(hex(randomblob(16)))),
         username TEXT NOT NULL UNIQUE,
         password TEXT NOT NULL,
-        token INTEGER NOT NULL DEFAULT 0
+        token INTEGER NOT NULL DEFAULT 0,
+        last_played TIMESTAMP NULL
       )
-      ''')
-      self.__db.commit()
-    except sqlite3.Error as e:
-      logger.error(e)
-      sys.exit(0)
-    except sqlite3.OperationalError as e:
-      logger.error(e)
-      sys.exit(0)
+    '''
 
-  def fetch_one(self, query) -> Any:
-    result = self.__cur.execute(query)
-
-    return self.__cur.fetchone()
-
-  def query(self, query) -> None:
-    self.__cur.execute(query)
-    self.__db.commit()
+    self.query(sql)

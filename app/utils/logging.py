@@ -1,10 +1,13 @@
 import logging.handlers
-from app.constant.core import LOG_FILE, LOG_MAX_BYTES, BACKUP_COUNT
+
+_LOG_FILE: str = 'inlife.log'
+_LOG_MAX_BYTES: int = 1024 * 1024 * 10
+_BACKUP_COUNT: int = 5
 
 log_handler = logging.handlers.RotatingFileHandler(
-  filename=LOG_FILE,
-  maxBytes=LOG_MAX_BYTES,
-  backupCount=BACKUP_COUNT
+  filename=_LOG_FILE,
+  maxBytes=_LOG_MAX_BYTES,
+  backupCount=_BACKUP_COUNT
 )
 
 log_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
