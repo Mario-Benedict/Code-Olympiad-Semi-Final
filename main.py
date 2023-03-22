@@ -10,13 +10,8 @@ from app.utils.logging import logger
 from app import InLifeInterpreter
 
 def main() -> None:
-  InLifeInterpreter()
+  interpreter = InLifeInterpreter()
+  interpreter.start()
 
 if __name__ == '__main__':
-  try:
-    main()
-  except (KeyboardInterrupt, SystemExit):
-    logger.info('Exiting application...')
-    printf('\nExiting application...', LIGHT_CYAN)
-
-    sys.exit(0)
+  main()
