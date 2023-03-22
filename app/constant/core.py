@@ -70,15 +70,6 @@ TRASH_CATEGORIES: ListOfDict[Union[str, List[str]]] = [
   },
 ]
 
-SHOP_LIST: Dict[str, int] = {
-  'Inlife Shopping Bag (1000 tokens)': 1000,
-  'Inlife Reusable Water Bottle (3000 tokens)': 3000,
-  'Inlife Reusable Straw (500 tokens)': 500,
-  'Inlife Reusable Coffee Cup (2000 tokens)': 2000,
-  'Inlife T-Shirt (5000 tokens)': 5000,
-  'Inlife Lunch Box (10000 tokens)': 10000,
-}
-
 BANNER_TEXT: str = format_str('''    ____            __   _    ____
    /  _/  ____     / /  (_)  / __/  ___
    / /   / __ \   / /  / /  / /_   / _ \\

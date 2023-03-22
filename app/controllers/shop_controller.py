@@ -1,45 +1,34 @@
-import enquiries
-from app.utils.helper import clear
-from app.utils.formatting import printf
-from app.constant.color import LIGHT_YELLOW, LIGHT_CYAN, LIGHT_RED
-from app.constant.core import BANNER_TEXT, SHOP_LIST
-from app.database import Database
-from app.types import Session
-from typing import List, Dict, Union
+from typing import Dict
+from app.controllers.base_controller import BaseController
+from app.constant.database import USERS_TABLE
 
-shop_options: SHOP_LIST = SHOP_LIST
-shop_options['Exit'] = 0
+_SHOP_LIST: Dict[str, int] = {
+  'Inlife Shopping Bag': 1000,
+  'Inlife Reusable Water Bottle': 3000,
+  'Inlife Reusable Straw': 500,
+  'Inlife Reusable Coffee Cup': 2000,
+  'Inlife T-Shirt': 5000,
+  'Inlife Lunch Box': 10000,
+  'Inlife Lifely Wife': 999999999,
+}
 
-def shop_controller(db: Database, session: Session) -> None:
-  clear()
+class ShopException(Exception):
+  pass
 
-  user_token = db.fetch_one(f'SELECT token FROM users WHERE id = "{session[0]}"')
-  user_token = user_token[0]
+class ShopController(BaseController):
+  def get_products(self) -> Dict[str, int]:
+    return _SHOP_LIST
 
-  while True:
-    printf('Welcome to the shop', LIGHT_YELLOW)
-    print(BANNER_TEXT)
+  def purchase(self, uid: str, product_name: str) -> None:
+    price = _SHOP_LIST[product_name]
+    balance = self.get_balance(uid)
 
-    printf(f'You have {user_token} {"tokens" if user_token > 1 else "token"}', LIGHT_CYAN)
-    message = 'Please choose the item you want to buy:'
+    if balance < price:
+      raise ShopException('You don\'t have enough tokens to buy the item')
 
-    choice = enquiries.choose(message, shop_options)
+    sql = f'UPDATE {USERS_TABLE} SET token = token - ? WHERE id = ?'
+    self._db.query(sql, price, uid)
 
-    if choice == 'Exit':
-      clear()
-      return
-
-    purchased_item_price = shop_options[choice]
-
-    if user_token < purchased_item_price:
-      clear()
-      printf('You don\'t have enough token to buy the item', LIGHT_RED)
-      continue
-
-    user_token -= purchased_item_price
-
-    db.query(f'UPDATE users SET token = {user_token} WHERE id = "{session[0]}"')
-    break
-
-  clear()
-  printf('Thanks for purchasing', LIGHT_CYAN)
+  def get_balance(self, uid: str) -> int:
+    sql = f'SELECT token FROM {USERS_TABLE} WHERE id = ?'
+    return self._db.fetch_one(sql, uid)['token']
