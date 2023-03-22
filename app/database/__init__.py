@@ -1,6 +1,6 @@
 import sqlite3
 import sys
-from app.config import DATABASE_FILE
+from app.constant.file import DATABASE_FILE
 from app.utils.logging import logger
 from typing import Any, Union
 

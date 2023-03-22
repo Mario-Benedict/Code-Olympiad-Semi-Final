@@ -1,14 +1,18 @@
-from app.config.db_config import METADATA_FILE
+from time import strptime
+from app.constant.file import METADATA_FILE
 from app.constant.database import USERS_TABLE
 from app.controllers.base_controller import BaseController
+from app.types.session import Session
 from app.utils.helper import get_file_dir, remove_file_home_dir
 from app.utils.password import hash_password, check_password
 
 from datetime import datetime, timedelta
-from typing import Union, List
+from typing import Union
 
 import sys
 import os
+
+_SESSION_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
 
 class AuthException(Exception):
   pass
@@ -37,15 +41,14 @@ class AuthController(BaseController):
       raise AuthException('Invalid username or password')
 
     if check_password(password, user['password']):
-      with open(get_file_dir(METADATA_FILE), 'w') as f:
-        expiration_date = datetime.now() + timedelta(days=30)
-        f.write(f'{str(user["id"])}, {str(user["username"])}, {expiration_date.strftime("%Y-%m-%d %H:%M:%S")}')
+      expiration_date = datetime.now() + timedelta(30)
+      self.__write_session(user['id'], user['username'], expiration_date)
 
   def logout(self) -> None:
     remove_file_home_dir(METADATA_FILE)
     sys.exit(1)
 
-  def get_session(self) -> Union[List[str], None]:
+  def get_session(self) -> Union[None, Session]:
     if not os.path.isfile(get_file_dir(METADATA_FILE)):
       return None
 
@@ -58,4 +61,13 @@ class AuthController(BaseController):
       if len(session) < 3:
         return None
 
-      return session
+      return Session(
+        uid=session[0],
+        username=session[1],
+        expiration_date=strptime(session[2], _SESSION_DATE_FORMAT)
+      )
+
+  def __write_session(self, uid: str, username: str, expiration_date: datetime) -> None:
+    with open(get_file_dir(METADATA_FILE), 'w+') as f:
+      expiration_date_str = expiration_date.strftime(_SESSION_DATE_FORMAT)
+      f.write(f'{uid}, {username}, {expiration_date_str}')

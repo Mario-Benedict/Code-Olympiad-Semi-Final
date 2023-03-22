@@ -3,7 +3,7 @@ from enum import Enum
 from app.constant.database import USERS_TABLE
 from app.controllers.base_controller import BaseController
 from app.utils.helper import get_file_dir
-from app.config import GAME_FILE
+from app.constant.file import GAME_FILE
 from typing import List
 import random
 from datetime import datetime, timedelta

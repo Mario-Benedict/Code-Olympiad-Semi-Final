@@ -1,5 +1,5 @@
 import sys
-from app.config import DATABASE_FILE, METADATA_FILE
+from app.constant.file import DATABASE_FILE, METADATA_FILE
 from app.constant.color import LIGHT_YELLOW, WHITE, LIGHT_CYAN
 from app.constant.core import BANNER_TEXT
 from app.database import Database
@@ -38,6 +38,7 @@ class InLifeInterpreter:
 
   def __print_banner(self) -> None:
     banner = BANNER_TEXT
+    username = self.session.username.upper()
 
     banner += '\n\n'
 
@@ -52,7 +53,7 @@ class InLifeInterpreter:
 
     banner += '\n'
 
-    banner += format_str(f'Welcome back, {self.session[1].upper()}!', LIGHT_CYAN)
+    banner += format_str(f'Welcome back, {username}!', LIGHT_CYAN)
 
     print(banner)
 
@@ -78,11 +79,11 @@ class InLifeInterpreter:
 
   def __start_minigame(self) -> None:
     view = GameView(self.__game_controller)
-    view.start(self.session[0])
+    view.start(self.session.uid)
 
   def __start_shop(self) -> None:
     view = ShopView(self.__shop_controller)
-    view.start(self.session[0])
+    view.start(self.session.uid)
 
   def __logout(self) -> None:
     printf('Good bye!', LIGHT_CYAN)
