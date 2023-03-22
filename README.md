@@ -11,7 +11,7 @@
 
 ### Installation
 
-- _Clone the repository_ **OR** _download the zip, rar, tar, etc (you need yo extract them)_
+- _Clone the repository_ **OR** _download the zip, rar, tar, etc (you need to extract them)_
 
 ```sh
 Mac
@@ -44,4 +44,4 @@ OR
 $ make run
 ```
 
-- _Press CTRL + C **OR** CMD + C to stop the pp_
+- _Press CTRL + C **OR** CMD + C to stop the app_
