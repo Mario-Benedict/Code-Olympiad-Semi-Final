@@ -7,8 +7,9 @@ from app.utils.formatting import printf, format_str
 from app.utils.logging import logger
 from app.utils.helper import remove_file_home_dir, file_checker, clear
 import enquiries
-from app.controllers import game_controller, AuthController, ShopController
+from app.controllers import GameController, AuthController, ShopController
 from app.views.auth_view import AuthView
+from app.views.game_view import GameView
 from app.views.shop_view import ShopView
 
 class InLifeInterpreter:
@@ -17,8 +18,8 @@ class InLifeInterpreter:
 
     self.__db = Database()
 
-
     self.__auth_controller = AuthController(self.__db)
+    self.__game_controller = GameController(self.__db)
     self.__shop_controller = ShopController(self.__db)
 
   def start(self) -> None:
@@ -66,7 +67,7 @@ class InLifeInterpreter:
       self.__print_banner()
 
       choices = {
-        'Minigame': lambda: game_controller(self.__db, self.session),
+        'Minigame': self.__start_minigame,
         'Shop': self.__start_shop,
         'Logout': self.__logout,
         'Exit': lambda: sys.exit(1)
@@ -74,6 +75,10 @@ class InLifeInterpreter:
 
       option = enquiries.choose("Choose one of this option", choices)
       choices[option]()
+
+  def __start_minigame(self) -> None:
+    view = GameView(self.__game_controller)
+    view.start(self.session[0])
 
   def __start_shop(self) -> None:
     view = ShopView(self.__shop_controller)
