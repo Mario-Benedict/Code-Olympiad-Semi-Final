@@ -1,6 +1,8 @@
+from ast import List
 import sqlite3
 import sys
 from app.constant.file import DATABASE_FILE
+from app.types import Question, TrashCategory
 from app.utils.logging import logger
 from typing import Any, Union
 
@@ -38,7 +40,7 @@ class Database:
     self.__db.commit()
 
   def __setup_tables(self) -> None:
-    sql = '''
+    users_table = '''
       CREATE TABLE IF NOT EXISTS users (
         id TEXT PRIMARY KEY NOT NULL UNIQUE DEFAULT (lower(hex(randomblob(16)))),
         username TEXT NOT NULL UNIQUE,
@@ -48,4 +50,142 @@ class Database:
       )
     '''
 
-    self.query(sql)
+    self.query(users_table)
+
+    trash_table = '''
+      CREATE TABLE IF NOT EXISTS trash (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        name TEXT NOT NULL UNIQUE,
+        category TEXT CHECK (category IN ("Household", "Hazardous", "Medical", "Electrical", "Construction", "Organic")) NOT NULL
+      )
+    '''
+
+    self.query(trash_table)
+
+    _QUESTIONS: List[Question] = [
+      {
+        'category': TrashCategory.Household,
+        'question': 'Newspapers'
+      },
+      {
+        'category': TrashCategory.Household,
+        'question': 'Cardboards'
+      },
+      {
+        'category': TrashCategory.Household,
+        'question': 'Plastic Bags'
+      },
+      {
+        'category': TrashCategory.Household,
+        'question': 'Glass Bottles'
+      },
+      {
+        'category': TrashCategory.Household,
+        'question': 'Metal Cans'
+      },
+      {
+        'category': TrashCategory.Hazardous,
+        'question': 'Batteries'
+      },
+      {
+        'category': TrashCategory.Hazardous,
+        'question': 'Light Bulbs'
+      },
+      {
+        'category': TrashCategory.Hazardous,
+        'question': 'Fluorescent Tubes'
+      },
+      {
+        'category': TrashCategory.Hazardous,
+        'question': 'Paint'
+      },
+      {
+        'category': TrashCategory.Hazardous,
+        'question': 'Oil'
+      },
+      {
+        'category': TrashCategory.Medical,
+        'question': 'Bandages'
+      },
+      {
+        'category': TrashCategory.Medical,
+        'question': 'Syringes'
+      },
+      {
+        'category': TrashCategory.Medical,
+        'question': 'Gloves'
+      },
+      {
+        'category': TrashCategory.Medical,
+        'question': 'Pills'
+      },
+      {
+        'category': TrashCategory.Medical,
+        'question': 'Needles'
+      },
+      {
+        'category': TrashCategory.Electrical,
+        'question': 'Old Computers'
+      },
+      {
+        'category': TrashCategory.Electrical,
+        'question': 'Old Laptops'
+      },
+      {
+        'category': TrashCategory.Electrical,
+        'question': 'Old Mobile Phones'
+      },
+      {
+        'category': TrashCategory.Electrical,
+        'question': 'Old Printers'
+      },
+      {
+        'category': TrashCategory.Electrical,
+        'question': 'Old Printers'
+      },
+      {
+        'category': TrashCategory.Construction,
+        'question': 'Bricks'
+      },
+      {
+        'category': TrashCategory.Construction,
+        'question': 'Gypsum'
+      },
+      {
+        'category': TrashCategory.Construction,
+        'question': 'Sawdust'
+      },
+      {
+        'category': TrashCategory.Construction,
+        'question': 'Steel'
+      },
+      {
+        'category': TrashCategory.Construction,
+        'question': 'Broken Windows'
+      },
+      {
+        'category': TrashCategory.Organic,
+        'question': 'Fruits'
+      },
+      {
+        'category': TrashCategory.Organic,
+        'question': 'Vegetables'
+      },
+      {
+        'category': TrashCategory.Organic,
+        'question': 'Leaves'
+      },
+      {
+        'category': TrashCategory.Organic,
+        'question': 'Grass'
+      },
+      {
+        'category': TrashCategory.Organic,
+        'question': 'Flowers'
+      },
+    ]
+
+    insert_trash = 'INSERT OR IGNORE INTO trash (name, category) VALUES (?, ?)'
+
+    for question in _QUESTIONS:
+      self.query(insert_trash, question['question'], question['category'].value)

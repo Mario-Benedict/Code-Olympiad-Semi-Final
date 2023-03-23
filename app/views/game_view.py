@@ -1,4 +1,4 @@
-from typing import List, Self
+from typing import List
 
 import enquiries
 from app.constant.color import BOLD, LIGHT_CYAN, LIGHT_YELLOW
@@ -32,7 +32,7 @@ class GameView:
       options = self.__controller.get_options()
       user_answer = enquiries.choose(question_text, options)
 
-      if user_answer == question['category'].value:
+      if user_answer == question['category']:
         score += 1
 
       clear()
