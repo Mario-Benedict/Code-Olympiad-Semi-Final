@@ -26,7 +26,7 @@ class ShopView:
 
       products = self.__controller.get_products()
 
-      choices = { self.__transform_name(name, price): name for name, price in products.items() }
+      choices = { self.__transform_name(product['name'], product['price']): product['name'] for product in products }
       choices[BACK] = None
 
       prompt = 'Please choose the item you want to buy:'

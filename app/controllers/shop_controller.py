@@ -1,26 +1,18 @@
 from typing import Dict
 from app.controllers.base_controller import BaseController
 from app.constant.database import USERS_TABLE
-
-_SHOP_LIST: Dict[str, int] = {
-  'Inlife Shopping Bag': 1000,
-  'Inlife Reusable Water Bottle': 3000,
-  'Inlife Reusable Straw': 500,
-  'Inlife Reusable Coffee Cup': 2000,
-  'Inlife T-Shirt': 5000,
-  'Inlife Lunch Box': 10000,
-  'Inlife Lifely Wife': 999999999,
-}
-
 class ShopException(Exception):
   pass
 
 class ShopController(BaseController):
   def get_products(self) -> Dict[str, int]:
-    return _SHOP_LIST
+    return self._db.fetch_all('SELECT name, price FROM shop')
+
+  def __get_product(self, name: str) -> Dict[str, int]:
+    return self._db.fetch_one('SELECT name, price FROM shop WHERE name = ?', name)
 
   def purchase(self, uid: str, product_name: str) -> None:
-    price = _SHOP_LIST[product_name]
+    price = self.__get_product(product_name)['price']
     balance = self.get_balance(uid)
 
     if balance < price:

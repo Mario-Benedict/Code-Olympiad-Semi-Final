@@ -4,7 +4,7 @@ import sys
 from app.constant.file import DATABASE_FILE
 from app.types import Question, TrashCategory
 from app.utils.logging import logger
-from typing import Any, Union
+from typing import Any, Dict, Union
 
 class Database:
   def __init__(self) -> None:
@@ -61,6 +61,16 @@ class Database:
     '''
 
     self.query(trash_table)
+
+    shop_table = '''
+      CREATE TABLE IF NOT EXISTS shop (
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL UNIQUE,
+        name TEXT NOT NULL UNIQUE,
+        price INTEGER NOT NULL
+      )
+    '''
+
+    self.query(shop_table)
 
     _QUESTIONS: List[Question] = [
       {
@@ -189,3 +199,15 @@ class Database:
 
     for question in _QUESTIONS:
       self.query(insert_trash, question['question'], question['category'].value)
+
+    _SHOP_LIST: Dict[str, int] = {
+      'Inlife Shopping Bag': 1000,
+      'Inlife Reusable Water Bottle': 3000,
+      'Inlife Reusable Straw': 500,
+      'Inlife Reusable Coffee Cup': 2000,
+      'Inlife T-Shirt': 5000,
+      'Inlife Lunch Box': 10000,
+    }
+
+    for item, price in _SHOP_LIST.items():
+      self.query('INSERT OR IGNORE INTO shop (name, price) VALUES (?, ?)', item, price)
