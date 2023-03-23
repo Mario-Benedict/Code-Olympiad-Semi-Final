@@ -6,8 +6,9 @@
 
 - _Python 3.10.6_ **OR** _newer_
 - _Python venv_
-- _Makefile system_ (optional)
-- _.editorconfig_ (optional)
+- _SQLite3_
+- _Makefile_ (optional)
+- _VSCode editorconfig extension_ (optional)
 
 ### Installation
 
